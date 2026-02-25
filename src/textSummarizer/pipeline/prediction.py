@@ -1,19 +1,29 @@
 from textSummarizer.config.configuration import ConfigurationManager
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
+import os
 
 
 class PredictionPipeline:
     def __init__(self):
-        self.config = ConfigurationManager().get_model_evaluation_config()
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.tokenizer = AutoTokenizer.from_pretrained(self.config.tokenizer_path)
-        self.model = AutoModelForSeq2SeqLM.from_pretrained(self.config.model_path).to(device)
+
+        HF_MODEL_NAME = os.getenv("HF_MODEL_NAME", "dpkmaurya2025/text-summarizer")
+
+        self.tokenizer = AutoTokenizer.from_pretrained(HF_MODEL_NAME)
+        self.model = AutoModelForSeq2SeqLM.from_pretrained(HF_MODEL_NAME).to(device)
         self.device = device
         
         
+        
     def predict(self, text):
-        inputs = self.tokenizer(text, return_tensors="pt", truncation=True, padding="max_length", max_length=512).to(self.device)
+        inputs = self.tokenizer(text,
+                                return_tensors="pt",
+                                truncation=True,
+                                padding="max_length",
+                                max_length=512
+                            )
+        inputs = {k: v.to(self.device) for k, v in inputs.items()}                
 
         with torch.no_grad():
             summary_ids = self.model.generate(

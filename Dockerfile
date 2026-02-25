@@ -6,6 +6,8 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
+ENV HF_MODEL_NAME=dpkmaurya2025/text-summarizer
+
 # Install system dependencies (if needed)
 RUN apt-get update && apt-get install -y \
     build-essential \
